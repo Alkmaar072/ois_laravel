@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Chat Laravel Pusher | Edlin App</title>
+  <title>Chat Experiment</title>
   <link rel="icon" href="https://assets.edlin.app/favicon/favicon.ico"/>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -23,7 +23,7 @@
   <div class="top">
     <img src="/avatar.jfif" height="100px" alt="Avatar">
     <div>
-      <p>Ross Edlin</p>
+      <p>Joris van Vliet</p>
       <small>Online</small>
     </div>
   </div>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Chat GPT Laravel | Code with Ross</title>
+  <title>Chat Experiment</title>
   <link rel="icon" href="https://assets.edlin.app/favicon/favicon.ico"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -22,7 +22,7 @@
   <div class="top">
     <img src="/avatar.jfif" height="100px" alt="Avatar">
     <div>
-      <p>Ross Edlin</p>
+      <p>Joris van Vliet</p>
       <small>Online</small>
     </div>
   </div>
@@ -31,7 +31,7 @@
   <!-- Chat -->
   <div class="messages">
     <div class="left message">
-    <img src="/avatar.jfif" height="45px" alt="Avatar">
+    <img src="/avatar.jfif" height="45px" alt="answer ">
       <p>Hi bedankt dat je wilt meedoen met ons experiment.</p>
     </div>
   </div>
@@ -50,32 +50,13 @@
 </body>
 
 <script>
+  var messagesArray = [];
   // Simulate initial message on page load
   $(document).ready(function() {
-    var initialMessage = "Geef antwoord op de volgende vragen alsof je een dialoog aan het houden bent als mens. Jouw reacties moeten dus menselijk en vriendelijk overkomen. Zorg dat je antwoord kort blijft, max 2 zinnen.";
-
-    $.ajax({
-      url: "/chat",
-      method: 'POST',
-      headers: {
-        'X-CSRF-TOKEN': "{{csrf_token()}}"
-      },
-      data: {
-        "model": "gpt-3.5-turbo",
-        "content": initialMessage
-      }
-    })
-  });
-
-  //Broadcast messages
-  $("form").submit(function (event) {
-    event.preventDefault();
-
-    //Stop empty messages
-    if ($("form #message").val().trim() === '') {
-      return;
-    }
-
+    var initialMessage = "Geef in deze chat antwoord op vragen alsof je een dialoog aan het houden bent als mens, niet als assistent. Biedt dus ook geen hulp aan. Jouw reacties moeten dus menselijk en vriendelijk overkomen. Zorg dat je antwoord kort blijft, maximaal 10 woorden. Alles dient in het nederlands te zijn.";
+    messagesArray.push({"role": "user", "content": initialMessage})
+    console.log(messagesArray)
+    
     //Disable form
     $("form #message").prop('disabled', true);
     $("form button").prop('disabled', true);
@@ -88,29 +69,83 @@
       },
       data: {
         "model": "gpt-3.5-turbo",
-        "content": $("form #message").val()
+        "messages": messagesArray
       }
     }).done(function (res) {
-
-      //Populate sending message
-      $(".messages > .message").last().after('<div class="right message">' +
-        '<p>' + $("form #message").val() + '</p>' +
-        '<img src="/avatar1.jfif" height="45px" alt="Avatar">' +
-        '</div>');
-
-      //Populate receiving message
-      $(".messages > .message").last().after('<div class="left message">' +
-        '<img src="/avatar.jfif" height="45px" alt="Avatar">' +
-        '<p>' + res + '</p>' +
-        '</div>');
-
-      //Cleanup
-      $("form #message").val('');
-      $(document).scrollTop($(document).height());
+      messagesArray.push(res);
 
       //Enable form
       $("form #message").prop('disabled', false);
       $("form button").prop('disabled', false);
+      console.log(messagesArray)
+    });
+  });
+
+  function calculateDelayTime(message) {
+    // Average typing speed: 300 characters per minute
+    var typingSpeed = 300;
+    
+    // Calculate delay time in milliseconds
+    var delayTime = (message.length / typingSpeed) * 60 * 1000;
+
+    return delayTime;
+  }
+
+  // Broadcast messages
+  $("form").submit(function (event) {
+    event.preventDefault();
+    messagesArray.push({"role": "user", "content": $("form #message").val()})
+    console.log(messagesArray)
+
+    // Stop empty messages
+    if ($("form #message").val().trim() === '') {
+      return;
+    }
+
+    // Disable form
+    $("form #message").prop('disabled', true);
+    $("form button").prop('disabled', true);
+
+    $.ajax({
+      url: "/chat",
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': "{{csrf_token()}}"
+      },
+      data: {
+        "model": "gpt-3.5-turbo",
+        "messages": messagesArray
+      }
+    }).done(function (res) {
+      messagesArray.push(res);
+
+      // Calculate delay time based on response length
+      var delayTime = calculateDelayTime(res['content']);
+      // var delayTime = 0;
+
+      // Delay the display of the response
+      setTimeout(function() {
+        // Populate sending message
+        $(".messages > .message").last().after('<div class="right message">' +
+          '<p>' + $("form #message").val() + '</p>' +
+          '<img src="/avatar1.jfif" height="45px" alt=" question">' +
+          '</div>');
+
+        // Populate receiving message
+        $(".messages > .message").last().after('<div class="left message">' +
+          '<img src="/avatar.jfif" height="45px" alt="answer ">' +
+          '<p>' + res['content'] + '</p>' +
+          '</div>');
+
+        // Cleanup
+        $("form #message").val('');
+        $(document).scrollTop($(document).height());
+
+        // Enable form
+        $("form #message").prop('disabled', false);
+        $("form button").prop('disabled', false);
+        console.log(messagesArray);
+      }, delayTime);
     });
   });
 

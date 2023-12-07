@@ -10,9 +10,8 @@ class ChatController extends Controller
 {
     /**
      * @param Request $request
-     * @return string
      */
-    public function __invoke(Request $request): string
+    public function __invoke(Request $request)
     {
         try {
             /** @var array $response */
@@ -23,19 +22,17 @@ class ChatController extends Controller
                 "Authorization" => "Bearer " . env('CHAT_GPT_KEY')
             ])->post('https://api.openai.com/v1/chat/completions', [
                 "model" => $request->post('model'),
-                "messages" => [
-                    [
-                        "role" => "user",
-                        "content" => $request->post('content')
-                    ]
-                ],
+                "messages" => $request->post('messages'),
                 "temperature" => 0,
                 "max_tokens" => 2048
             ])->json(); // Use json() to parse the response as JSON
 
-            return $response['choices'][0]['message']['content'];
+            return $response['choices'][0]['message'];
         } catch (Throwable $e) {
-            return "Chat GPT Limit Reached. This means too many people have used this demo this month and hit the FREE limit available. You will need to wait, sorry about that." . env('CHAT_GPT_KEY');
+            return response()->json([
+            'role' => 'assistant',
+            'content' => "Uhm sorry ik begrijp niet helemaal wat je bedoelt"
+        ]);
         }
     }
 }
