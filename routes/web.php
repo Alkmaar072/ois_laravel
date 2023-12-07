@@ -17,3 +17,9 @@ Route::get('/', 'App\Http\Controllers\PusherController@index');
 Route::post('/broadcast', 'App\Http\Controllers\PusherController@broadcast');
 Route::post('/receive', 'App\Http\Controllers\PusherController@receive');
 
+
+Route::get('/experiment', function () {
+    return view('welcome');
+});
+
+Route::post('/chat', 'App\Http\Controllers\ChatController');
