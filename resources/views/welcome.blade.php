@@ -90,21 +90,30 @@
 
     return delayTime;
   }
-
   // Broadcast messages
   $("form").submit(function (event) {
     event.preventDefault();
-    messagesArray.push({"role": "user", "content": $("form #message").val()})
-    console.log(messagesArray)
-
+    var userMessage = $("form #message").val();
     // Stop empty messages
-    if ($("form #message").val().trim() === '') {
+    if (userMessage.trim() === '') {
       return;
     }
+
+    messagesArray.push({"role": "user", "content": userMessage});
+    console.log(messagesArray);
+
+    // Cleanup
+    $("form #message").val('');
 
     // Disable form
     $("form #message").prop('disabled', true);
     $("form button").prop('disabled', true);
+
+    // Populate sending message
+    $(".messages > .message").last().after('<div class="right message">' +
+      '<p>' + userMessage + '</p>' +
+      '<img src="/avatar1.jfif" height="45px" alt=" question">' +
+      '</div>');
 
     $.ajax({
       url: "/chat",
@@ -121,16 +130,9 @@
 
       // Calculate delay time based on response length
       var delayTime = calculateDelayTime(res['content']);
-      // var delayTime = 0;
 
       // Delay the display of the response
       setTimeout(function() {
-        // Populate sending message
-        $(".messages > .message").last().after('<div class="right message">' +
-          '<p>' + $("form #message").val() + '</p>' +
-          '<img src="/avatar1.jfif" height="45px" alt=" question">' +
-          '</div>');
-
         // Populate receiving message
         $(".messages > .message").last().after('<div class="left message">' +
           '<img src="/avatar.jfif" height="45px" alt="answer ">' +
@@ -138,7 +140,6 @@
           '</div>');
 
         // Cleanup
-        $("form #message").val('');
         $(document).scrollTop($(document).height());
 
         // Enable form
@@ -148,6 +149,7 @@
       }, delayTime);
     });
   });
+
 
 </script>
 </html>
